@@ -1,12 +1,14 @@
+// #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
+
 pub mod tetris_game;
 
 #[cfg(test)]
 mod tests {
     use std::collections::{HashMap, HashSet};
 
-    use super::tetris_game::SprintGame;
     use super::tetris_game::bag::Bag;
     use super::tetris_game::piece::{PieceType, UNIQUE_PIECE_TYPES};
+    use super::tetris_game::SprintGame;
 
     #[test]
     fn board_state() {

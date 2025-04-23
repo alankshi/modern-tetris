@@ -1,11 +1,11 @@
 pub mod bag;
-pub mod board_state;
+pub mod board;
 pub mod piece;
 
 use std::collections::VecDeque;
 
-use board_state::Board;
-use piece::{Piece, PieceType};
+use self::board::Board;
+use self::piece::{Piece, PieceType};
 
 pub struct SprintGame {
     pub board: Board,
@@ -15,12 +15,19 @@ pub struct SprintGame {
 }
 
 impl SprintGame {
-    pub fn new() -> SprintGame {
+    #[must_use]
+    pub fn new() -> Self {
         SprintGame {
             board: Board::new(),
             hold_piece: None,
             active_piece: None,
             piece_queue: VecDeque::new(),
         }
+    }
+}
+
+impl Default for SprintGame {
+    fn default() -> Self {
+        Self::new()
     }
 }

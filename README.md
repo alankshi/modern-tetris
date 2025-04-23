@@ -1,3 +1,3 @@
 # modern-tetris
 
-A rust library that simulates modern versus Tetris.
+A Rust crate for simulating modern Tetris, including versus Tetris.

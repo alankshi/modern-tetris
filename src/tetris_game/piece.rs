@@ -29,7 +29,7 @@ pub const UNIQUE_PIECE_TYPES: [PieceType; 7] = [
 
 impl Display for PieceType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -39,12 +39,14 @@ struct Position {
 }
 
 impl Position {
+    #[must_use]
     pub fn new() -> Position {
         Position { x: 0, y: 0 }
     }
 }
 
 impl Piece {
+    #[must_use]
     pub fn new(kind: PieceType) -> Piece {
         Piece {
             kind,

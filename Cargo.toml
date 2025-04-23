@@ -1,7 +1,11 @@
 [package]
 name = "modern-tetris"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2024"
+description = "Simulates modern tetris, including versus tetris"
+repository = "https://github.com/alankshi/modern-tetris"
+readme = "README.md"
+license = "MIT" 
 
 [dependencies]
 rand = "0.9.1"
