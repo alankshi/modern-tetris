@@ -1,6 +1,6 @@
-mod bag;
-mod board_state;
-mod piece;
+pub mod bag;
+pub mod board_state;
+pub mod piece;
 
 use std::collections::VecDeque;
 
@@ -16,8 +16,6 @@ pub struct SprintGame {
 
 impl SprintGame {
     pub fn new() -> SprintGame {
-        let mut bag: [Piece; 7];
-
         SprintGame {
             board: Board::new(),
             hold_piece: None,

@@ -1,9 +1,12 @@
+use std::fmt::{Display, Error, Formatter};
+
 pub struct Piece {
     kind: PieceType,
     rotation: u8,
     position: Position,
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum PieceType {
     S,
     Z,
@@ -12,6 +15,22 @@ pub enum PieceType {
     T,
     I,
     O,
+}
+
+pub const UNIQUE_PIECE_TYPES: [PieceType; 7] = [
+    PieceType::I,
+    PieceType::L,
+    PieceType::J,
+    PieceType::S,
+    PieceType::Z,
+    PieceType::T,
+    PieceType::O,
+];
+
+impl Display for PieceType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "{:?}", self)
+    }
 }
 
 struct Position {
