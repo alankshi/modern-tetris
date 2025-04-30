@@ -1,11 +1,12 @@
 extern crate rand;
 
-use self::rand::{rng, Rng};
+use self::rand::{Rng, rng};
 
 use super::{piece::PieceType, piece::UNIQUE_PIECE_TYPES};
 
+#[derive(Debug)]
 pub struct Bag {
-    pub size: u32,
+    size: u32,
     curr_pieces: u32,
     unique_pieces_remaining: u8,
     pieces: [PieceType; 7],
@@ -14,6 +15,7 @@ pub struct Bag {
 
 impl Bag {
     #[must_use]
+    /// Creates a new, empty bag of size `size`
     pub fn new(size: u32) -> Bag {
         Bag {
             size,
@@ -48,7 +50,7 @@ impl Bag {
         self.pieces[chosen_idx]
     }
 
-    /// Fills the bag with `size` pieces
+    /// Fills the bag with `self.size` pieces
     fn fill(&mut self) {
         let initial_count = self.size / 7 + u32::from(self.size % 7 != 0);
 
@@ -63,5 +65,11 @@ impl Bag {
     /// Returns `true` if the bag is empty, `false` otherwise
     pub fn empty(&self) -> bool {
         self.curr_pieces == 0
+    }
+
+    #[must_use]
+    /// Returns `self.size`, the bag size
+    pub fn size(&self) -> u32 {
+        self.size
     }
 }

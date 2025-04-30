@@ -33,6 +33,7 @@ impl Display for PieceType {
     }
 }
 
+#[derive(Debug)]
 struct Position {
     x: u8,
     y: u8,
