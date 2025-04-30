@@ -5,6 +5,7 @@ pub struct Board {
 }
 
 impl Board {
+    /// Creates a new board with all cells empty
     #[must_use]
     pub fn new() -> Board {
         Board {
