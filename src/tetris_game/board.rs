@@ -22,8 +22,7 @@ impl Board {
     pub fn row_to_string(&self, row: usize) -> String {
         assert!(
             row < 20,
-            "Index out of bounds: attempted to access row {} of 20",
-            row
+            "Index out of bounds: attempted to access row {row} of 20",
         );
 
         let mut row_string = String::new();

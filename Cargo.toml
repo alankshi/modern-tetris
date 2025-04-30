@@ -6,6 +6,8 @@ description = "Simulates modern tetris, including versus tetris"
 repository = "https://github.com/alankshi/modern-tetris"
 readme = "README.md"
 license = "MIT" 
+keywords = ["tetris", "game"]
+categories = ["games"]
 
 [dependencies]
 rand = "0.9.1"

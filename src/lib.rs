@@ -8,7 +8,7 @@ mod tests {
 
     use super::tetris_game::SprintGame;
     use super::tetris_game::bag::Bag;
-    use super::tetris_game::piece::{PieceType, UNIQUE_PIECE_TYPES};
+    use super::tetris_game::piece::{Piece, PieceType, UNIQUE_PIECE_TYPES};
 
     #[test]
     fn board_state() {
@@ -42,6 +42,18 @@ mod tests {
                 count == 3,
                 "Every piece should be seen exactly thrice when drawing 21 pieces from a 21 sized bag"
             );
+        }
+    }
+
+    #[test]
+    fn display_all_piece_orientations() {
+        for kind in UNIQUE_PIECE_TYPES {
+            let mut piece = Piece::new(kind);
+
+            for _ in 0..4 {
+                println!("{}", piece);
+                piece.rotatecw();
+            }
         }
     }
 }
