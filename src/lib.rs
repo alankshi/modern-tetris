@@ -8,6 +8,7 @@ mod tests {
 
     use super::tetris_game::SprintGame;
     use super::tetris_game::bag::Bag;
+    use super::tetris_game::board::Board;
     use super::tetris_game::piece::{Piece, PieceType, UNIQUE_PIECE_TYPES};
 
     #[test]
@@ -52,7 +53,27 @@ mod tests {
 
             for _ in 0..4 {
                 println!("{}", piece);
-                piece.rotatecw();
+                piece.rotate_cw();
+            }
+        }
+    }
+
+    #[test]
+    fn lateral_movement() {
+        for piece_type in UNIQUE_PIECE_TYPES {
+            let mut piece = Piece::new(piece_type);
+            let board = Board::new();
+
+            println!("{}, {:?}", piece, piece.position());
+
+            for _ in 0..10 {
+                println!("{:?}", piece.move_right(&board));
+                println!("{}, {:?}", piece, piece.position());
+            }
+
+            for _ in 0..10 {
+                println!("{:?}", piece.move_left(&board));
+                println!("{}, {:?}", piece, piece.position());
             }
         }
     }

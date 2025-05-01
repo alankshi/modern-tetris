@@ -2,13 +2,14 @@ pub mod util;
 
 use std::fmt::{Display, Error, Formatter};
 
-use util::{Orientation, Position};
+use super::board::Board;
+use util::{Orientation, Position, TetrisError};
 pub use util::{PieceType, UNIQUE_PIECE_TYPES};
 
 pub struct Piece {
-    pub kind: PieceType,
-    pub orientation: Orientation,
-    pub position: Position,
+    kind: PieceType,
+    orientation: Orientation,
+    position: Position,
 }
 
 impl Piece {
@@ -78,14 +79,90 @@ impl Piece {
         }
     }
 
+    pub fn kind(&self) -> PieceType {
+        self.kind
+    }
+
+    pub fn orientation(&self) -> Orientation {
+        self.orientation
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
+    }
+
     /// Rotate the piece clockwise, changing its orientation accordingly
-    pub fn rotatecw(&mut self) {
+    pub fn rotate_cw(&mut self) {
         self.orientation = self.orientation.clockwise();
     }
 
     /// Rotate the piece counterclockwise, changing its orientation accordingly
-    pub fn rotateccw(&mut self) {
+    pub fn rotate_ccw(&mut self) {
         self.orientation = self.orientation.counterclockwise();
+    }
+
+    /// Moves the piece to the right, returning `Ok` if the move is executed,
+    /// else a `Err(TetrisError::InvalidMove)` if the piece cannot move due to
+    /// an obstruction (an already placed piece or the right wall).
+    pub fn move_right(&mut self, board: &Board) -> Result<(), TetrisError> {
+        let mask = self.get_mask();
+
+        // calculate the right edge to check whether the piece runs into anything on its right
+        let mut right_edge = [None; 4];
+        for cell_idx in mask {
+            right_edge[(cell_idx / 4) as usize] = Some(cell_idx % 4);
+        }
+
+        for (y_offset, x_offset) in right_edge.iter().enumerate() {
+            match x_offset {
+                None => continue,
+                Some(x_offset) => {
+                    let row = self.position.y as usize + y_offset;
+                    let col_to_move_to = self.position.x + *x_offset as i32 + 1;
+
+                    if col_to_move_to >= 10 || board[row][col_to_move_to as usize].is_some() {
+                        return Err(TetrisError::InvalidMove(
+                            "Move right failed due to an obstruction.",
+                        ));
+                    }
+                }
+            }
+        }
+
+        self.position.x += 1;
+        Ok(())
+    }
+
+    /// Moves the piece to the left, returning `Ok` if the move is executed,
+    /// else a `Err(TetrisError::InvalidMove)` if the piece cannot move due to
+    /// an obstruction (an already placed piece or the left wall).
+    pub fn move_left(&mut self, board: &Board) -> Result<(), TetrisError> {
+        let mask = self.get_mask();
+
+        // calculate the left edge to check whether the piece runs into anything on its left
+        let mut left_edge = [None; 4];
+        for cell_idx in mask.iter().rev() {
+            left_edge[(cell_idx / 4) as usize] = Some(cell_idx % 4);
+        }
+
+        for (y_offset, x_offset) in left_edge.iter().enumerate() {
+            match x_offset {
+                None => continue,
+                Some(x_offset) => {
+                    let row = self.position.y as usize + y_offset;
+                    let curr_col = self.position.x + *x_offset as i32;
+
+                    if curr_col <= 0 || board[row][(curr_col - 1) as usize].is_some() {
+                        return Err(TetrisError::InvalidMove(
+                            "Move left failed due to an obstruction.",
+                        ));
+                    }
+                }
+            }
+        }
+
+        self.position.x -= 1;
+        Ok(())
     }
 }
 

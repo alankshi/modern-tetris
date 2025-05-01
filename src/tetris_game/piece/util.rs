@@ -27,7 +27,7 @@ pub const UNIQUE_PIECE_TYPES: [PieceType; 7] = [
     PieceType::O,
 ];
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Orientation {
     North,
     East,
@@ -67,8 +67,8 @@ impl Orientation {
 
 #[derive(Debug)]
 pub struct Position {
-    x: u8,
-    y: u8,
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Position {
@@ -82,4 +82,10 @@ impl Default for Position {
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[derive(Debug)]
+pub enum TetrisError<'a> {
+    InvalidMove(&'a str),
+    InvalidRotation(&'a str),
 }

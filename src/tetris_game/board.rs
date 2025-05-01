@@ -1,7 +1,8 @@
 use std::fmt::{Display, Error, Formatter};
+use std::ops::Index;
 
 pub struct Board {
-    board: [[bool; 10]; 20],
+    board: [[Option<()>; 10]; 20],
 }
 
 impl Board {
@@ -9,7 +10,7 @@ impl Board {
     #[must_use]
     pub fn new() -> Board {
         Board {
-            board: [[false; 10]; 20],
+            board: [[None; 10]; 20],
         }
     }
 
@@ -30,11 +31,21 @@ impl Board {
         row_string.push('|');
 
         for col in 0..10 {
-            row_string.push(if self.board[row][col] { '■' } else { ' ' });
+            row_string.push(if self.board[row][col].is_some() {
+                '■'
+            } else {
+                ' '
+            });
         }
 
         row_string.push_str("|\n");
         row_string
+    }
+}
+
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -48,8 +59,10 @@ impl Display for Board {
     }
 }
 
-impl Default for Board {
-    fn default() -> Self {
-        Self::new()
+impl Index<usize> for Board {
+    type Output = [Option<()>; 10];
+
+    fn index(&self, row: usize) -> &Self::Output {
+        &self.board[row]
     }
 }
