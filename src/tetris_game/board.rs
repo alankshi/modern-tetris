@@ -2,15 +2,15 @@ use std::fmt::{Display, Error, Formatter};
 use std::ops::Index;
 
 pub struct Board {
-    board: [[Option<()>; 10]; 20],
+    board: [[Option<()>; 10]; 24],
 }
 
 impl Board {
-    /// Creates a new board with all cells empty
     #[must_use]
+    /// Creates a new board with all cells empty
     pub fn new() -> Board {
         Board {
-            board: [[None; 10]; 20],
+            board: [[None; 10]; 24],
         }
     }
 
@@ -21,16 +21,17 @@ impl Board {
     ///
     /// Panics if `row` is out of bounds, that is if `row >= 20`, the height
     /// of a Tetris board.
-    pub fn row_to_string(&self, row: usize) -> String {
+    fn row_to_string(&self, row: usize) -> String {
         assert!(
-            row < 20,
-            "Index out of bounds: attempted to access row {row} of 20",
+            row < self.height() as usize,
+            "Index out of bounds: attempted to access row {row}, but only {} exist",
+            self.height(),
         );
 
         let mut row_string = String::new();
         row_string.push('|');
 
-        for col in 0..10 {
+        for col in 0..self.width() as usize {
             row_string.push(if self.board[row][col].is_some() {
                 '■'
             } else {
@@ -40,6 +41,14 @@ impl Board {
 
         row_string.push_str("|\n");
         row_string
+    }
+
+    pub const fn width(&self) -> u8 {
+        10
+    }
+
+    pub const fn height(&self) -> u8 {
+        24
     }
 }
 
@@ -52,7 +61,7 @@ impl Default for Board {
 impl Display for Board {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         writeln!(f, "+----------+")?;
-        for row in 0..20 {
+        for row in 0..self.height() as usize {
             write!(f, "{}", self.row_to_string(row))?;
         }
         writeln!(f, "+----------+")

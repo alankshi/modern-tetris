@@ -2,7 +2,7 @@ extern crate rand;
 
 use self::rand::{Rng, rng};
 
-use crate::tetris_game::piece::{PieceType, UNIQUE_PIECE_TYPES};
+use crate::tetris_game::piece::{PieceType, UNIQUE_TYPES};
 
 #[derive(Debug)]
 pub struct Bag {
@@ -21,7 +21,7 @@ impl Bag {
             size,
             curr_pieces: 0,
             unique_pieces_remaining: 0,
-            pieces: UNIQUE_PIECE_TYPES,
+            pieces: UNIQUE_TYPES,
             piece_counts: [0; 7],
         }
     }

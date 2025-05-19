@@ -3,8 +3,8 @@ pub mod util;
 use std::fmt::{Display, Error, Formatter};
 
 use super::board::Board;
+pub use util::{DEFAULT_POSITION, PieceType, UNIQUE_TYPES};
 use util::{Orientation, Position, TetrisError};
-pub use util::{PieceType, UNIQUE_PIECE_TYPES};
 
 pub struct Piece {
     kind: PieceType,
@@ -19,7 +19,7 @@ impl Piece {
         Piece {
             kind,
             orientation: Orientation::North,
-            position: Position::new(),
+            position: DEFAULT_POSITION,
         }
     }
 
@@ -34,8 +34,8 @@ impl Piece {
     /// |8|9|10|11|
     /// |12|13|14|15|
     ///
-    /// where the position of the piece is at the top left corner, at position
-    /// 0. The array of bytes is sorted in ascending order.
+    /// where the position of the piece is at the top left corner, labeled 0
+    /// The array of bytes is sorted in ascending order.
     #[must_use]
     pub fn get_mask(&self) -> [u8; 4] {
         match self.kind {
@@ -115,17 +115,19 @@ impl Piece {
 
         for (y_offset, x_offset) in right_edge.iter().enumerate() {
             match x_offset {
-                None => continue,
                 Some(x_offset) => {
                     let row = self.position.y as usize + y_offset;
                     let col_to_move_to = self.position.x + *x_offset as i32 + 1;
 
-                    if col_to_move_to >= 10 || board[row][col_to_move_to as usize].is_some() {
+                    if col_to_move_to >= board.width() as i32
+                        || board[row][col_to_move_to as usize].is_some()
+                    {
                         return Err(TetrisError::InvalidMove(
                             "Move right failed due to an obstruction.",
                         ));
                     }
                 }
+                None => continue,
             }
         }
 

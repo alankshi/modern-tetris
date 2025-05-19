@@ -1,5 +1,7 @@
 use std::fmt::{Display, Error, Formatter};
 
+pub const DEFAULT_POSITION: Position = Position::at(3, 1);
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum PieceType {
     S,
@@ -17,7 +19,7 @@ impl Display for PieceType {
     }
 }
 
-pub const UNIQUE_PIECE_TYPES: [PieceType; 7] = [
+pub const UNIQUE_TYPES: [PieceType; 7] = [
     PieceType::I,
     PieceType::L,
     PieceType::J,
@@ -73,8 +75,15 @@ pub struct Position {
 
 impl Position {
     #[must_use]
+    /// Constructs a new position at the origin
     pub fn new() -> Position {
         Position { x: 0, y: 0 }
+    }
+
+    #[must_use]
+    /// Constructs a new position at position (x, y)
+    pub const fn at(x: i32, y: i32) -> Position {
+        Position { x, y }
     }
 }
 
