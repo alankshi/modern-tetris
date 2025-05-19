@@ -1,5 +1,7 @@
 use std::fmt::{Display, Error, Formatter};
 
+use super::Piece;
+
 pub const DEFAULT_POSITION: Position = Position::at(3, 1);
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -97,4 +99,29 @@ impl Default for Position {
 pub enum TetrisError<'a> {
     InvalidMove(&'a str),
     InvalidRotation(&'a str),
+}
+
+impl Display for Piece {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        let mut curr_cell = 0;
+        let mask = self.get_mask();
+
+        for i in 0..16 {
+            if i % 4 == 0 && i > 0 {
+                writeln!(f)?;
+            }
+
+            write!(
+                f,
+                "{}",
+                if curr_cell < 4 && i == mask[curr_cell] {
+                    curr_cell += 1;
+                    "■"
+                } else {
+                    " "
+                }
+            )?;
+        }
+        Ok(())
+    }
 }

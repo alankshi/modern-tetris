@@ -2,7 +2,7 @@ extern crate rand;
 
 use self::rand::{Rng, rng};
 
-use crate::tetris_game::piece::{PieceType, UNIQUE_TYPES};
+use crate::piece::{PieceType, UNIQUE_TYPES};
 
 #[derive(Debug)]
 pub struct Bag {
@@ -71,5 +71,40 @@ impl Bag {
     /// Returns `self.size`, the bag size
     pub fn size(&self) -> u32 {
         self.size
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Bag;
+    use std::collections::HashMap;
+
+    #[test]
+    fn bag_emptying() {
+        let mut my_bag = Bag::new(7);
+        assert!(my_bag.empty(), "bag should start out empty");
+        for _ in 0..7 {
+            my_bag.draw();
+        }
+        assert!(
+            my_bag.empty(),
+            "Bag should be empty after drawing size times"
+        );
+    }
+
+    #[test]
+    fn bag_drawing() {
+        let mut my_bag = Bag::new(21);
+        let mut piece_counts = HashMap::new();
+        for _ in 0..21 {
+            *(piece_counts.entry(my_bag.draw()).or_insert(0)) += 1;
+        }
+
+        for (_, count) in piece_counts {
+            assert!(
+                count == 3,
+                "Every piece should be seen exactly thrice when drawing 21 pieces from a 21 sized bag"
+            );
+        }
     }
 }
