@@ -16,6 +16,7 @@ impl Piece {
         }
 
         for (y_offset, x_offset) in right_edge.iter().enumerate() {
+            // TODO: refactor to if let
             match x_offset {
                 Some(x_offset) => {
                     let row = self.position.y as usize + y_offset;
@@ -50,6 +51,7 @@ impl Piece {
         }
 
         for (y_offset, x_offset) in left_edge.iter().enumerate() {
+            // TODO: refactor to if let
             match x_offset {
                 None => continue,
                 Some(x_offset) => {

@@ -1,8 +1,11 @@
+mod drop;
+
 use std::fmt::{Display, Error, Formatter};
 use std::ops::Index;
 
 pub struct Board {
     board: [[Option<()>; 10]; 24],
+    column_heights: [u8; 10],
 }
 
 impl Board {
@@ -11,7 +14,18 @@ impl Board {
     pub fn new() -> Board {
         Board {
             board: [[None; 10]; 24],
+            column_heights: [0; 10],
         }
+    }
+
+    /// Returns the width of the board, which is always 10
+    pub const fn width(&self) -> u8 {
+        10
+    }
+
+    /// Returns the height of the board, which is always 24
+    pub const fn height(&self) -> u8 {
+        24
     }
 
     #[must_use]
@@ -41,14 +55,6 @@ impl Board {
 
         row_string.push_str("|\n");
         row_string
-    }
-
-    pub const fn width(&self) -> u8 {
-        10
-    }
-
-    pub const fn height(&self) -> u8 {
-        24
     }
 }
 

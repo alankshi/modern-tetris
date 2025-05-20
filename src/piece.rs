@@ -1,9 +1,8 @@
 pub mod movement;
 pub mod util;
 
-use crate::board::Board;
 pub use util::{DEFAULT_POSITION, PieceType, UNIQUE_TYPES};
-use util::{Orientation, Position, TetrisError};
+use util::{Orientation, Position};
 
 pub struct Piece {
     kind: PieceType,
@@ -91,6 +90,16 @@ impl Piece {
     /// Returns the position of the piece
     pub fn position(&self) -> &Position {
         &self.position
+    }
+
+    /// Returns the x position of the piece
+    pub fn x(&self) -> i32 {
+        self.position.x
+    }
+
+    /// Returns the y position of the piece
+    pub fn y(&self) -> i32 {
+        self.position.y
     }
 
     /// Rotate the piece clockwise, changing its orientation accordingly
