@@ -9,6 +9,7 @@ use position::Position;
 use util::Orientation;
 pub use util::{DEFAULT_ORIENTATION, DEFAULT_POSITION, UNIQUE_TYPES};
 
+#[derive(Clone)]
 pub struct Piece {
     kind: PieceType,
     mask: [u8; 4],
