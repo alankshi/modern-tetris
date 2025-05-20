@@ -43,11 +43,14 @@ impl Piece {
         Ok(())
     }
 
-    pub fn hard_drop(&mut self, column_heights: [u8; 10]) -> u8 {
+    /// Hard drops the piece, moving it downwards until it reaches an
+    /// obstruction. The new position is calculated in constant time using
+    /// `column_heights`.
+    pub fn hard_drop(&mut self, column_heights: [u8; 10]) {
         let mut drop_y = 0;
 
         for (i, y) in self.lower_edge().into_iter().flatten() {
-            // `piece.x() + i` will always be positive because the rules of
+            // `self.x() + i` will always be positive because the rules of
             // piece movement (no cells can be outside the board)
             let new_drop_y = y + column_heights[(self.x() + i as i32) as usize];
 
@@ -57,13 +60,12 @@ impl Piece {
         }
 
         self.position.set_y(drop_y as i32);
-        drop_y
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{DEFAULT_POSITION, PieceType, UNIQUE_TYPES};
+    use super::super::{DEFAULT_POSITION, UNIQUE_TYPES, piece_type::PieceType};
     use super::*;
 
     use std::collections::HashMap;

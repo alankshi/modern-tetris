@@ -29,25 +29,21 @@ impl Position {
         self.y
     }
 
-    #[must_use]
     /// Sets the y-coordinate of the position
     pub fn set_y(&mut self, y: i32) {
         self.y = y;
     }
 
-    #[must_use]
     /// Sets the x-coordinate of the position
     pub fn set_x(&mut self, x: i32) {
         self.x = x;
     }
 
-    #[must_use]
     /// Increments the x-coordinate of the position by 1
     pub fn move_right(&mut self) {
         self.x += 1;
     }
 
-    #[must_use]
     /// Decrements the x-coordinate of the position by 1
     pub fn move_left(&mut self) {
         self.x -= 1;

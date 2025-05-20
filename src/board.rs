@@ -3,6 +3,8 @@ mod drop;
 use std::fmt::{Display, Error, Formatter};
 use std::ops::Index;
 
+/// Represents a 10x20 Tetris game board, although the implementation height is
+/// 24, the maximum height a piece can be placed.
 pub struct Board {
     board: [[Option<()>; 10]; 24],
     column_heights: [u8; 10],
@@ -43,7 +45,6 @@ impl Board {
         );
 
         let mut row_string = String::new();
-        row_string.push('|');
 
         for col in 0..self.width() as usize {
             row_string.push(if self.board[row][col].is_some() {
@@ -53,7 +54,6 @@ impl Board {
             });
         }
 
-        row_string.push_str("|\n");
         row_string
     }
 }
@@ -66,9 +66,11 @@ impl Default for Board {
 
 impl Display for Board {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        writeln!(f, "+----------+")?;
-        for row in 0..self.height() as usize {
-            write!(f, "{}", self.row_to_string(row))?;
+        for row in 0..4 as usize {
+            writeln!(f, " {} ", self.row_to_string(row))?;
+        }
+        for row in 4..self.height() as usize {
+            writeln!(f, "|{}|", self.row_to_string(row))?;
         }
         writeln!(f, "+----------+")
     }
