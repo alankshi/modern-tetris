@@ -7,34 +7,20 @@ impl Piece {
     /// else a `Err(TetrisError::InvalidMove)` if the piece cannot move due to
     /// an obstruction (an already placed piece or the right wall).
     pub fn move_right(&mut self, board: &Board) -> Result<(), TetrisError> {
-        let mask = self.get_mask();
+        for (y_offset, x_offset) in self.right_edge().into_iter().flatten() {
+            let row = self.y() as usize + y_offset;
+            let col_to_move_to = self.x() + x_offset as i32 + 1;
 
-        // calculate the right edge to check whether the piece runs into anything on its right
-        let mut right_edge = [None; 4];
-        for cell_idx in mask {
-            right_edge[(cell_idx / 4) as usize] = Some(cell_idx % 4);
-        }
-
-        for (y_offset, x_offset) in right_edge.iter().enumerate() {
-            // TODO: refactor to if let
-            match x_offset {
-                Some(x_offset) => {
-                    let row = self.position.y as usize + y_offset;
-                    let col_to_move_to = self.position.x + *x_offset as i32 + 1;
-
-                    if col_to_move_to >= board.width() as i32
-                        || board[row][col_to_move_to as usize].is_some()
-                    {
-                        return Err(TetrisError::InvalidMove(
-                            "Move right failed due to an obstruction.",
-                        ));
-                    }
-                }
-                None => continue,
+            if col_to_move_to >= board.width() as i32
+                || board[row][col_to_move_to as usize].is_some()
+            {
+                return Err(TetrisError::InvalidMove(
+                    "Move right failed due to an obstruction.",
+                ));
             }
         }
 
-        self.position.x += 1;
+        self.position.move_right();
         Ok(())
     }
 
@@ -42,33 +28,36 @@ impl Piece {
     /// else a `Err(TetrisError::InvalidMove)` if the piece cannot move due to
     /// an obstruction (an already placed piece or the left wall).
     pub fn move_left(&mut self, board: &Board) -> Result<(), TetrisError> {
-        let mask = self.get_mask();
+        for (y_offset, x_offset) in self.left_edge().into_iter().flatten() {
+            let row = self.y() as usize + y_offset;
+            let curr_col = self.x() + x_offset as i32;
 
-        // calculate the left edge to check whether the piece runs into anything on its left
-        let mut left_edge = [None; 4];
-        for cell_idx in mask.iter().rev() {
-            left_edge[(cell_idx / 4) as usize] = Some(cell_idx % 4);
-        }
-
-        for (y_offset, x_offset) in left_edge.iter().enumerate() {
-            // TODO: refactor to if let
-            match x_offset {
-                None => continue,
-                Some(x_offset) => {
-                    let row = self.position.y as usize + y_offset;
-                    let curr_col = self.position.x + *x_offset as i32;
-
-                    if curr_col <= 0 || board[row][(curr_col - 1) as usize].is_some() {
-                        return Err(TetrisError::InvalidMove(
-                            "Move left failed due to an obstruction.",
-                        ));
-                    }
-                }
+            if curr_col <= 0 || board[row][(curr_col - 1) as usize].is_some() {
+                return Err(TetrisError::InvalidMove(
+                    "Move left failed due to an obstruction.",
+                ));
             }
         }
 
-        self.position.x -= 1;
+        self.position.move_left();
         Ok(())
+    }
+
+    pub fn hard_drop(&mut self, column_heights: [u8; 10]) -> u8 {
+        let mut drop_y = 0;
+
+        for (i, y) in self.lower_edge().into_iter().flatten() {
+            // `piece.x() + i` will always be positive because the rules of
+            // piece movement (no cells can be outside the board)
+            let new_drop_y = y + column_heights[(self.x() + i as i32) as usize];
+
+            if new_drop_y > drop_y {
+                drop_y = new_drop_y;
+            }
+        }
+
+        self.position.set_y(drop_y as i32);
+        drop_y
     }
 }
 
@@ -84,20 +73,20 @@ mod tests {
         for piece_type in UNIQUE_TYPES {
             let piece = Piece::new(piece_type);
             assert_eq!(
-                DEFAULT_POSITION.x,
-                piece.position().x,
+                DEFAULT_POSITION.x(),
+                piece.x(),
                 "Incorrect initial {} piece x, Expected {}, was {}",
                 piece_type,
-                DEFAULT_POSITION.x,
-                piece.position().x
+                DEFAULT_POSITION.x(),
+                piece.x()
             );
             assert_eq!(
-                DEFAULT_POSITION.y,
-                piece.position().y,
+                DEFAULT_POSITION.y(),
+                piece.y(),
                 "Incorrect initial {} piece y, Expected {}, was {}",
                 piece_type,
-                DEFAULT_POSITION.y,
-                piece.position().y
+                DEFAULT_POSITION.y(),
+                piece.y()
             );
         }
     }
@@ -122,12 +111,12 @@ mod tests {
                 let _ = piece.move_right(&board);
                 assert_eq!(
                     expected_x_positions_right_from_default[&piece_type][i],
-                    piece.position().x,
+                    piece.x(),
                     "Incorrect {piece_type} piece x-position after {} right \
                     moves starting from default position. Expected {}, was {}",
                     i + 1,
                     expected_x_positions_right_from_default[&piece_type][i],
-                    piece.position().x
+                    piece.x()
                 )
             }
         }
@@ -153,12 +142,12 @@ mod tests {
                 let _ = piece.move_left(&board);
                 assert_eq!(
                     expected_x_positions_left_from_default[&piece_type][i],
-                    piece.position().x,
+                    piece.x(),
                     "Incorrect {piece_type} piece x-position after {} left \
                     moves starting from default position. Expected {}, was {}",
                     i + 1,
                     expected_x_positions_left_from_default[&piece_type][i],
-                    piece.position().x
+                    piece.x()
                 )
             }
         }
@@ -189,12 +178,12 @@ mod tests {
                 let _ = piece.move_right(&board);
                 assert_eq!(
                     expected_x_positions_right_from_left[&piece_type][i],
-                    piece.position().x,
+                    piece.x(),
                     "Incorrect {piece_type} piece x-position after {} right \
                     moves starting from the left edge. Expected {}, was {}",
                     i + 1,
                     expected_x_positions_right_from_left[&piece_type][i],
-                    piece.position().x
+                    piece.x()
                 )
             }
         }
@@ -225,12 +214,12 @@ mod tests {
                 let _ = piece.move_left(&board);
                 assert_eq!(
                     expected_x_positions_left_from_right[&piece_type][i],
-                    piece.position().x,
+                    piece.x(),
                     "Incorrect {piece_type} piece x-position after {} left \
                     moves starting from the right edge. Expected {}, was {}",
                     i + 1,
                     expected_x_positions_left_from_right[&piece_type][i],
-                    piece.position().x
+                    piece.x()
                 )
             }
         }
