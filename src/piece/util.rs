@@ -24,12 +24,6 @@ pub enum Orientation {
     West,
 }
 
-impl Display for Orientation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{self:?}")
-    }
-}
-
 impl Orientation {
     #[must_use]
     /// Returns the direction clockwise of `self`.
@@ -54,34 +48,9 @@ impl Orientation {
     }
 }
 
-#[derive(Debug)]
-pub enum TetrisError<'a> {
-    InvalidMove(&'a str),
-    InvalidRotation(&'a str),
-}
-
-impl Display for Piece {
+impl Display for Orientation {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        let mut curr_cell = 0;
-        let mask = self.mask();
-
-        for i in 0..16 {
-            if i % 4 == 0 && i > 0 {
-                writeln!(f)?;
-            }
-
-            write!(
-                f,
-                "{}",
-                if curr_cell < 4 && i == mask[curr_cell] {
-                    curr_cell += 1;
-                    "■"
-                } else {
-                    " "
-                }
-            )?;
-        }
-        Ok(())
+        write!(f, "{self:?}")
     }
 }
 
@@ -146,5 +115,36 @@ impl Piece {
         }
 
         upper_edge
+    }
+}
+
+impl Display for Piece {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        let mut curr_cell = 0;
+        let mask = self.mask();
+
+        for i in 0..16 {
+            if i % 4 == 0 && i > 0 {
+                writeln!(f)?;
+            }
+
+            write!(
+                f,
+                "{}",
+                if curr_cell < 4 && i == mask[curr_cell] {
+                    curr_cell += 1;
+                    "■"
+                } else {
+                    " "
+                }
+            )?;
+        }
+        Ok(())
+    }
+}
+
+impl From<PieceType> for Piece {
+    fn from(item: PieceType) -> Self {
+        Self::new(item)
     }
 }

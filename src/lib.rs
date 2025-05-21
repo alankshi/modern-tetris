@@ -13,6 +13,15 @@ use piece::{Piece, PieceType};
 
 pub use game::SprintGame;
 
+#[derive(Debug, PartialEq)]
+pub enum TetrisError {
+    InvalidRightMove,
+    InvalidLeftMove,
+    InvalidCWRotation,
+    InvalidCCWRotation,
+    InvalidHold,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::SprintGame;

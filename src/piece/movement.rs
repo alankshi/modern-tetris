@@ -1,6 +1,4 @@
-use super::Piece;
-use super::util::TetrisError;
-use crate::board::Board;
+use crate::{Board, Piece, TetrisError};
 
 impl Piece {
     /// Moves the piece to the right, returning `Ok` if the move is executed,
@@ -14,9 +12,7 @@ impl Piece {
             if col_to_move_to >= board.width() as i32
                 || board[row][col_to_move_to as usize].is_some()
             {
-                return Err(TetrisError::InvalidMove(
-                    "Move right failed due to an obstruction.",
-                ));
+                return Err(TetrisError::InvalidRightMove);
             }
         }
 
@@ -33,9 +29,7 @@ impl Piece {
             let curr_col = self.x() + x_offset as i32;
 
             if curr_col <= 0 || board[row][(curr_col - 1) as usize].is_some() {
-                return Err(TetrisError::InvalidMove(
-                    "Move left failed due to an obstruction.",
-                ));
+                return Err(TetrisError::InvalidLeftMove);
             }
         }
 

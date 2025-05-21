@@ -1,4 +1,5 @@
 use super::Orientation;
+use crate::Piece;
 
 use std::fmt::{Display, Error, Formatter};
 
@@ -74,5 +75,11 @@ impl PieceType {
             },
             PieceType::O => [1, 2, 5, 6],
         }
+    }
+}
+
+impl From<Piece> for PieceType {
+    fn from(item: Piece) -> Self {
+        item.kind()
     }
 }
