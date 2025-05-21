@@ -76,7 +76,7 @@ impl Piece {
             let cell_y_offset = (pos / 4) as i32;
 
             let cell_x = self.x() + cell_x_offset;
-            let cell_y = 23 - self.y() + cell_y_offset;
+            let cell_y = self.y() + cell_y_offset;
 
             pos_mask[i] = Position::at(cell_x, cell_y);
         }

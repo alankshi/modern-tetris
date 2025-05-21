@@ -7,11 +7,15 @@ impl Board {
         piece.hard_drop(self.column_heights)?;
 
         for pos in piece.get_pos_mask() {
+            println!("{:?}", pos);
             self.board[pos.y() as usize][pos.x() as usize] = Some(());
         }
 
         for (i, y_offset) in piece.upper_edge().into_iter().flatten() {
-            self.column_heights[(piece.x() + i as i32) as usize] = piece.y() as u8 - y_offset + 1;
+            // -piece.y() + 23 converts piece y-coordinate (where higher is
+            // lower on the board because arrays) to height, actual y-coordinate
+            self.column_heights[(piece.x() + i as i32) as usize] =
+                (-piece.y() + 23) as u8 - y_offset + 1;
         }
 
         Ok(())
@@ -30,7 +34,7 @@ mod tests {
         let mut correct_col_heights = [0u8; 10];
 
         for i in 0..22 {
-            board.hard_drop(Piece::new(PieceType::I));
+            let _ = board.hard_drop(Piece::new(PieceType::I));
             correct_col_heights[3] += 1;
             correct_col_heights[4] += 1;
             correct_col_heights[5] += 1;

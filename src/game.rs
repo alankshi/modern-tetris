@@ -1,8 +1,10 @@
-use crate::traits::Controllable;
-use crate::{Bag, Board, Piece, PieceType, TetrisError};
+mod controller;
+
+use crate::piece::DEFAULT_ORIENTATION;
+use crate::{Bag, Board, Piece, PieceType};
 
 use std::collections::VecDeque;
-use std::mem;
+use std::fmt::{Display, Error, Formatter};
 
 pub struct SprintGame {
     board: Board,
@@ -104,153 +106,95 @@ impl Default for SprintGame {
     }
 }
 
-impl Controllable for SprintGame {
-    fn move_left(&mut self) -> Result<(), TetrisError> {
-        self.active_piece.as_mut().unwrap().move_left(&self.board)
-    }
+impl Display for SprintGame {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        let mut board_display = [[' '; 12]; 24];
 
-    fn move_right(&mut self) -> Result<(), TetrisError> {
-        self.active_piece.as_mut().unwrap().move_right(&self.board)
-    }
+        for row in 0..24 {
+            if row >= 4 {
+                board_display[row][0] = '|';
+                board_display[row][11] = '|';
+            }
 
-    fn rotate_cw(&mut self) -> Result<(), TetrisError> {
-        self.active_piece.as_mut().unwrap().rotate_cw()
-    }
-
-    fn rotate_ccw(&mut self) -> Result<(), TetrisError> {
-        self.active_piece.as_mut().unwrap().rotate_ccw()
-    }
-
-    fn rotate_180(&mut self) -> Result<(), TetrisError> {
-        self.active_piece.as_mut().unwrap().rotate_180()
-    }
-
-    fn hard_drop(&mut self) -> Result<(), TetrisError> {
-        let mut piece_to_drop = None;
-        mem::swap(&mut self.active_piece, &mut piece_to_drop);
-
-        self.board.hard_drop(piece_to_drop.unwrap())?;
-        self.can_hold = true;
-        self.load_next_piece();
-
-        Ok(())
-    }
-
-    fn hold(&mut self) -> Result<(), TetrisError> {
-        if !self.can_hold {
-            return Err(TetrisError::InvalidHold);
+            for (col, char) in self.board.row_to_string(row).chars().enumerate() {
+                board_display[row][col + 1] = char;
+            }
+        }
+        // Overlay active piece
+        if let Some(piece) = &self.active_piece {
+            let pos_mask = piece.get_pos_mask();
+            for pos in pos_mask {
+                board_display[pos.y() as usize][pos.x() as usize + 1] = '■';
+            }
         }
 
-        let mut prev_hold_piece = match self.hold_piece {
-            Some(piece_type) => Some(piece_type.into()),
-            None => None,
-        };
-        mem::swap(&mut self.active_piece, &mut prev_hold_piece);
-
-        if self.active_piece().is_none() {
-            self.load_next_piece();
+        let mut hold_display = [
+            [' ', 'H', 'o', 'l', 'd', ' ', ' '],
+            ['+', '-', '-', '-', '-', '+', ' '],
+            ['|', ' ', ' ', ' ', ' ', '|', ' '],
+            ['|', ' ', ' ', ' ', ' ', '|', ' '],
+            ['+', '-', '-', '-', '-', '+', ' '],
+        ];
+        if let Some(piece_type) = self.hold_piece {
+            for pos in piece_type.mask(DEFAULT_ORIENTATION) {
+                let row = (pos / 4) as usize;
+                let col = (pos % 4) as usize;
+                hold_display[row + 2][col + 1] = '■';
+            }
         }
 
-        let prev_active_piece = prev_hold_piece;
-        self.hold_piece = match prev_active_piece {
-            Some(piece) => Some(piece.into()),
-            None => None,
-        };
+        let mut next_display = [
+            [' ', ' ', 'N', 'e', 'x', 't', ' '],
+            [' ', '+', '-', '-', '-', '-', '+'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '|', ' ', ' ', ' ', ' ', '|'],
+            [' ', '+', '-', '-', '-', '-', '+'],
+        ];
 
-        self.can_hold = false;
+        for (i, piece_type) in self.piece_queue().iter().enumerate() {
+            for pos in piece_type.mask(DEFAULT_ORIENTATION) {
+                let row = (pos / 4) as usize;
+                let col = (pos % 4) as usize;
+                next_display[row + 2 + 3 * i][col + 2] = '■';
+            }
+        }
+
+        for row in 0..24 {
+            if 4 <= row && row <= 8 {
+                for col in 0..7 {
+                    write!(f, "{}", hold_display[row - 4][col])?;
+                }
+            } else {
+                write!(f, "       ")?;
+            }
+
+            for col in 0..12 {
+                write!(f, "{}", board_display[row][col])?;
+            }
+
+            if 4 <= row && row <= 21 {
+                for col in 0..7 {
+                    write!(f, "{}", next_display[row - 4][col])?;
+                }
+            }
+
+            writeln!(f, "")?;
+        }
+        writeln!(f, "       +----------+")?;
+
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn successful_hold() {
-        let mut game = SprintGame::new_tetrio();
-        game.start();
-
-        let active_kind = game
-            .active_piece()
-            .expect("Active piece should not be None upon game start.")
-            .kind();
-
-        assert_eq!(
-            Ok(()),
-            game.hold(),
-            "First hold after game start should be valid."
-        );
-        assert_eq!(
-            active_kind,
-            game.hold_piece()
-                .expect("Hold piece should never be None after the first hold."),
-            "Hold piece was not the same kind as the active piece after switching."
-        );
-
-        game.hard_drop();
-        let hold_kind = game.hold_piece().unwrap();
-        let active_kind = game
-            .active_piece()
-            .expect("Active piece should never be None after game start.")
-            .kind();
-
-        assert_eq!(
-            Ok(()),
-            game.hold(),
-            "First hold after piece placement should be valid."
-        );
-        assert_eq!(
-            active_kind,
-            game.hold_piece()
-                .expect("Hold piece should never be None after the first hold."),
-            "Hold piece was not the same kind as the previous active piece after switching."
-        );
-        assert_eq!(
-            hold_kind,
-            game.active_piece()
-                .expect("Active piece should never be None after game start.")
-                .kind(),
-            "Active piece was not the same kind as the previous hold piece after switching."
-        );
-    }
-
-    #[test]
-    fn unsuccessful_hold() {
-        let mut game = SprintGame::new_tetrio();
-        game.start();
-
-        assert_eq!(
-            Ok(()),
-            game.hold(),
-            "First hold after game start should be valid."
-        );
-        assert_eq!(
-            Err(TetrisError::InvalidHold),
-            game.hold(),
-            "Second hold after game start without placing a piece should be invalid."
-        );
-        assert_eq!(
-            Err(TetrisError::InvalidHold),
-            game.hold(),
-            "Third hold after game start without placing a piece should be invalid."
-        );
-
-        game.hard_drop();
-        assert_eq!(
-            Ok(()),
-            game.hold(),
-            "First hold after piece placement should be valid."
-        );
-        assert_eq!(
-            Err(TetrisError::InvalidHold),
-            game.hold(),
-            "Second hold after a piece placement without placing another piece should be invalid."
-        );
-        assert_eq!(
-            Err(TetrisError::InvalidHold),
-            game.hold(),
-            "Third hold after a piece placement without placing another piece should be invalid."
-        );
     }
 }

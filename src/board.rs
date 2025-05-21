@@ -37,7 +37,7 @@ impl Board {
     ///
     /// Panics if `row` is out of bounds, that is if `row >= 20`, the height
     /// of a Tetris board.
-    fn row_to_string(&self, row: usize) -> String {
+    pub fn row_to_string(&self, row: usize) -> String {
         assert!(
             row < self.height() as usize,
             "Index out of bounds: attempted to access row {row}, but only {} exist",

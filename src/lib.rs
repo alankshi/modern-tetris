@@ -49,10 +49,11 @@ mod tests {
         let mut game = SprintGame::new_tetrio();
 
         game.start();
-        println!("{}", game.board());
+        println!("{}", game);
 
+        game.hold();
         game.hard_drop();
-        println!("{}", game.board());
+        println!("{}", game);
 
         game.move_right();
         game.move_right();
@@ -60,7 +61,7 @@ mod tests {
         game.move_right();
         game.rotate_cw();
         game.hard_drop();
-        println!("{}", game.board());
+        println!("{}", game);
 
         game.move_left();
         game.move_left();
@@ -68,7 +69,12 @@ mod tests {
         game.move_left();
         game.rotate_ccw();
         game.hard_drop();
-        println!("{}", game.board());
+        println!("{}", game);
+
+        game.hard_drop();
+        game.hard_drop();
+        game.hard_drop();
+        println!("{}", game);
     }
 
     #[test]
