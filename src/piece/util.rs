@@ -46,6 +46,17 @@ impl Orientation {
             Self::West => Self::South,
         }
     }
+
+    #[must_use]
+    /// Returns the direction opposite of `self`.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Self::North => Self::South,
+            Self::East => Self::West,
+            Self::South => Self::North,
+            Self::West => Self::East,
+        }
+    }
 }
 
 impl Display for Orientation {

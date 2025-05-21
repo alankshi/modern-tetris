@@ -20,6 +20,20 @@ pub enum TetrisError {
     InvalidCWRotation,
     InvalidCCWRotation,
     InvalidHold,
+    GameOver,
+}
+
+pub enum TetrisInput {
+    SoftDrop,
+    HardDrop,
+    MoveLeft,
+    MoveRight,
+    SnapRight,
+    SnapLeft,
+    RotateCW,
+    RotateCCW,
+    Rotate180,
+    Hold,
 }
 
 #[cfg(test)]

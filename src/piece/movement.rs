@@ -40,7 +40,7 @@ impl Piece {
     /// Hard drops the piece, moving it downwards until it reaches an
     /// obstruction. The new position is calculated in constant time using
     /// `column_heights`.
-    pub fn hard_drop(&mut self, column_heights: [u8; 10]) {
+    pub fn hard_drop(&mut self, column_heights: [u8; 10]) -> Result<(), TetrisError> {
         let mut drop_y = 0;
 
         for (i, y) in self.lower_edge().into_iter().flatten() {
@@ -54,6 +54,7 @@ impl Piece {
         }
 
         self.position.set_y(drop_y as i32);
+        Ok(())
     }
 }
 

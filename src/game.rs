@@ -105,29 +105,35 @@ impl Default for SprintGame {
 }
 
 impl Controllable for SprintGame {
-    fn move_left(&mut self) {
-        let _ = self.active_piece.as_mut().unwrap().move_left(&self.board);
+    fn move_left(&mut self) -> Result<(), TetrisError> {
+        self.active_piece.as_mut().unwrap().move_left(&self.board)
     }
 
-    fn move_right(&mut self) {
-        let _ = self.active_piece.as_mut().unwrap().move_right(&self.board);
+    fn move_right(&mut self) -> Result<(), TetrisError> {
+        self.active_piece.as_mut().unwrap().move_right(&self.board)
     }
 
-    fn rotate_cw(&mut self) {
-        self.active_piece.as_mut().unwrap().rotate_cw();
+    fn rotate_cw(&mut self) -> Result<(), TetrisError> {
+        self.active_piece.as_mut().unwrap().rotate_cw()
     }
 
-    fn rotate_ccw(&mut self) {
-        self.active_piece.as_mut().unwrap().rotate_ccw();
+    fn rotate_ccw(&mut self) -> Result<(), TetrisError> {
+        self.active_piece.as_mut().unwrap().rotate_ccw()
     }
 
-    fn hard_drop(&mut self) {
+    fn rotate_180(&mut self) -> Result<(), TetrisError> {
+        self.active_piece.as_mut().unwrap().rotate_180()
+    }
+
+    fn hard_drop(&mut self) -> Result<(), TetrisError> {
         let mut piece_to_drop = None;
         mem::swap(&mut self.active_piece, &mut piece_to_drop);
 
-        self.board.hard_drop(piece_to_drop.unwrap());
+        self.board.hard_drop(piece_to_drop.unwrap())?;
         self.can_hold = true;
         self.load_next_piece();
+
+        Ok(())
     }
 
     fn hold(&mut self) -> Result<(), TetrisError> {
@@ -210,7 +216,7 @@ mod tests {
     }
 
     #[test]
-    fn invalid_hold() {
+    fn unsuccessful_hold() {
         let mut game = SprintGame::new_tetrio();
         game.start();
 
