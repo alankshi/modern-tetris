@@ -1,7 +1,7 @@
 mod controller;
 
 use crate::piece::DEFAULT_ORIENTATION;
-use crate::{Bag, Board, Piece, PieceType};
+use crate::{Bag, Board, Controllable, Game, Piece, PieceType, TetrisInput};
 
 use std::collections::VecDeque;
 use std::fmt::{Display, Error, Formatter};
@@ -15,6 +15,7 @@ pub struct SprintGame {
 
     can_hold: bool,
     queue_size: usize,
+    frame: u64,
 }
 
 impl SprintGame {
@@ -30,6 +31,7 @@ impl SprintGame {
 
             can_hold: true,
             queue_size,
+            frame: 0,
         }
     }
 
@@ -42,10 +44,11 @@ impl SprintGame {
             hold_piece: None,
             active_piece: None,
             piece_queue: VecDeque::new(),
-
             bag: Bag::new(7),
+
             can_hold: true,
             queue_size: 5,
+            frame: 0,
         }
     }
 
@@ -92,11 +95,6 @@ impl SprintGame {
 
         self.active_piece = Some(Piece::new(self.piece_queue.pop_front().unwrap()));
         self.fill_queue();
-    }
-
-    pub fn start(&mut self) {
-        self.fill_queue();
-        self.load_next_piece();
     }
 }
 
@@ -196,5 +194,19 @@ impl Display for SprintGame {
         writeln!(f, "       +----------+")?;
 
         Ok(())
+    }
+}
+
+impl Game for SprintGame {
+    fn start(&mut self) {
+        self.fill_queue();
+        self.load_next_piece();
+    }
+
+    fn next_frame(&mut self, inputs: VecDeque<TetrisInput>) {
+        for input in inputs {
+            let _ = self.execute_input(input);
+        }
+        self.frame += 1;
     }
 }

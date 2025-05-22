@@ -1,5 +1,5 @@
-use crate::traits::Controllable;
-use crate::{SprintGame, TetrisError};
+use crate::Controllable;
+use crate::{Game, SprintGame, TetrisError};
 
 use std::mem;
 
