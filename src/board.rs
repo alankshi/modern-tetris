@@ -30,6 +30,10 @@ impl Board {
         24
     }
 
+    pub fn cells(&self) -> &[[Option<()>; 10]; 24] {
+        &self.board
+    }
+
     #[must_use]
     /// Returns the string representation of a row of the board
     ///

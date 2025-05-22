@@ -5,14 +5,14 @@ mod board;
 mod game;
 mod piece;
 
-use std::collections::VecDeque;
+use std::{cell::RefMut, collections::VecDeque};
 
 // private re-exports for modules
 use bag::Bag;
 use board::Board;
 use piece::{Piece, PieceType};
 
-pub use game::SprintGame;
+pub use game::TetrisGame;
 
 #[derive(Debug, PartialEq)]
 pub enum TetrisError {
@@ -21,9 +21,12 @@ pub enum TetrisError {
     InvalidCWRotation,
     InvalidCCWRotation,
     InvalidHold,
+    FailedToLoadPiece,
     GameOver,
+    GameNotStarted,
 }
 
+#[derive(Clone)]
 pub enum TetrisInput {
     SoftDrop,
     HardDrop,
@@ -35,9 +38,10 @@ pub enum TetrisInput {
     RotateCCW,
     Rotate180,
     Hold,
+    Forfeit,
 }
 
-trait Controllable {
+trait Controllable: Game {
     fn rotate_ccw(&mut self) -> Result<(), TetrisError>;
     fn rotate_cw(&mut self) -> Result<(), TetrisError>;
     fn rotate_180(&mut self) -> Result<(), TetrisError>;
@@ -67,74 +71,58 @@ trait Controllable {
             TetrisInput::RotateCCW => self.rotate_ccw(),
             TetrisInput::Rotate180 => self.rotate_180(),
             TetrisInput::Hold => self.hold(),
+            TetrisInput::Forfeit => Ok(self.end_game()),
         }
     }
 }
 
-pub trait Game: Controllable {
-    fn start(&mut self);
-    fn next_frame(&mut self, inputs: VecDeque<TetrisInput>);
+pub trait Game {
+    fn start(&mut self) -> Result<(), TetrisError>;
+    fn next_frame(&mut self, inputs: &mut VecDeque<TetrisInput>) -> Result<(), TetrisError>;
+    fn end_game(&mut self);
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::piece::Piece;
-    use crate::{Controllable, Game, SprintGame, piece};
+    use std::collections::VecDeque;
+
+    use crate::TetrisError;
+    use crate::{Controllable, Game, TetrisGame, piece};
 
     #[test]
-    // not an actual test
-    fn game() {
-        let mut game = SprintGame::new_tetrio();
+    fn game_lifetime() {
+        let mut game = TetrisGame::new_tetrio();
 
-        game.start();
-        println!("{}", game);
+        assert_eq!(
+            Err(TetrisError::GameNotStarted),
+            game.next_frame(&mut VecDeque::new()),
+            "Game should throw GameNotStarted if trying to advance frames before it starts."
+        );
 
-        game.hold();
-        game.hard_drop();
-        println!("{}", game);
+        game.start()
+            .expect("Game should be able to be started before game over.");
 
-        game.move_right();
-        game.move_right();
-        game.move_right();
-        game.move_right();
-        game.rotate_cw();
-        game.hard_drop();
-        println!("{}", game);
+        assert_eq!(
+            Err(TetrisError::FailedToLoadPiece),
+            game.start(),
+            "Game should throw a FailedToLoadPiece if started after already being started but before game over."
+        );
 
-        game.move_left();
-        game.move_left();
-        game.move_left();
-        game.move_left();
-        game.rotate_ccw();
-        game.hard_drop();
-        println!("{}", game);
+        game.next_frame(&mut VecDeque::new())
+            .expect("Game should be able to advance frames after game start and before game end.");
 
-        game.hard_drop();
-        game.hard_drop();
-        game.hard_drop();
-        println!("{}", game);
-    }
+        game.end_game();
 
-    #[test]
-    // not an actual test
-    fn board_state() {
-        let mut game = SprintGame::new_tetrio();
-        println!("{}", game.board());
+        assert_eq!(
+            Err(TetrisError::GameOver),
+            game.start(),
+            "Attempting to start the game after game over should throw a GameOver error"
+        );
 
-        game.fill_queue();
-        println!("Initial queue: {:?}", game.piece_queue());
-    }
-
-    #[test]
-    // not an actual test
-    fn display_all_piece_orientations() {
-        for kind in piece::UNIQUE_TYPES {
-            let mut piece = Piece::new(kind);
-
-            for _ in 0..4 {
-                println!("{}", piece);
-                piece.rotate_cw();
-            }
-        }
+        assert_eq!(
+            Err(TetrisError::GameOver),
+            game.next_frame(&mut VecDeque::new()),
+            "Attempting to advance frames after game over should throw a GameOver error"
+        );
     }
 }

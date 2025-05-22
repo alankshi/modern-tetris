@@ -7,7 +7,6 @@ impl Board {
         piece.hard_drop(self.column_heights)?;
 
         for pos in piece.get_pos_mask() {
-            println!("{:?}", pos);
             self.board[pos.y() as usize][pos.x() as usize] = Some(());
         }
 

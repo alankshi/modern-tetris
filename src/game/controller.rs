@@ -1,9 +1,9 @@
 use crate::Controllable;
-use crate::{Game, SprintGame, TetrisError};
+use crate::{Game, TetrisError, TetrisGame};
 
 use std::mem;
 
-impl Controllable for SprintGame {
+impl Controllable for TetrisGame {
     fn move_left(&mut self) -> Result<(), TetrisError> {
         self.active_piece.as_mut().unwrap().move_left(&self.board)
     }
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn successful_hold() {
-        let mut game = SprintGame::new_tetrio();
+        let mut game = TetrisGame::new_tetrio();
         game.start();
 
         let active_kind = game
@@ -116,7 +116,7 @@ mod tests {
 
     #[test]
     fn unsuccessful_hold() {
-        let mut game = SprintGame::new_tetrio();
+        let mut game = TetrisGame::new_tetrio();
         game.start();
 
         assert_eq!(

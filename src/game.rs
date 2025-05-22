@@ -1,34 +1,36 @@
 mod controller;
 
 use crate::piece::DEFAULT_ORIENTATION;
-use crate::{Bag, Board, Controllable, Game, Piece, PieceType, TetrisInput};
+use crate::{Bag, Board, Controllable, Game, Piece, PieceType, TetrisError, TetrisInput};
 
 use std::collections::VecDeque;
 use std::fmt::{Display, Error, Formatter};
 
-pub struct SprintGame {
+pub struct TetrisGame {
     board: Board,
     hold_piece: Option<PieceType>,
     active_piece: Option<Piece>,
     piece_queue: VecDeque<PieceType>,
     bag: Bag,
 
+    game_over: bool,
     can_hold: bool,
     queue_size: usize,
     frame: u64,
 }
 
-impl SprintGame {
+impl TetrisGame {
     /// Creates a new sprint game with a specified bag and queue size
     #[must_use]
     pub fn new(bag_size: u32, queue_size: usize) -> Self {
-        SprintGame {
+        TetrisGame {
             board: Board::new(),
             hold_piece: None,
             active_piece: None,
             piece_queue: VecDeque::new(),
             bag: Bag::new(bag_size),
 
+            game_over: false,
             can_hold: true,
             queue_size,
             frame: 0,
@@ -39,13 +41,14 @@ impl SprintGame {
     /// 5
     #[must_use]
     pub fn new_tetrio() -> Self {
-        SprintGame {
+        TetrisGame {
             board: Board::new(),
             hold_piece: None,
             active_piece: None,
             piece_queue: VecDeque::new(),
             bag: Bag::new(7),
 
+            game_over: false,
             can_hold: true,
             queue_size: 5,
             frame: 0,
@@ -85,26 +88,30 @@ impl SprintGame {
         &self.piece_queue
     }
 
-    fn load_next_piece(&mut self) {
+    /// Returns a reference to the upcoming piece queue
+    #[must_use]
+    pub fn game_over(&self) -> bool {
+        self.game_over
+    }
+
+    fn load_next_piece(&mut self) -> Result<(), TetrisError> {
         if self.active_piece.is_some() {
-            panic!(
-                "Cannot load next piece while current piece, {}, still exists.",
-                self.active_piece().unwrap().kind()
-            )
+            return Err(TetrisError::FailedToLoadPiece);
         }
 
         self.active_piece = Some(Piece::new(self.piece_queue.pop_front().unwrap()));
         self.fill_queue();
+        Ok(())
     }
 }
 
-impl Default for SprintGame {
+impl Default for TetrisGame {
     fn default() -> Self {
         Self::new(7, 5)
     }
 }
 
-impl Display for SprintGame {
+impl Display for TetrisGame {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         let mut board_display = [[' '; 12]; 24];
 
@@ -187,26 +194,49 @@ impl Display for SprintGame {
                 for col in 0..7 {
                     write!(f, "{}", next_display[row - 4][col])?;
                 }
+            } else {
+                write!(f, "       ")?;
             }
 
             writeln!(f, "")?;
         }
-        writeln!(f, "       +----------+")?;
+        writeln!(f, "       +----------+       ")?;
+
+        if self.game_over {
+            writeln!(f, "        GAME  OVER        ")?;
+        }
 
         Ok(())
     }
 }
 
-impl Game for SprintGame {
-    fn start(&mut self) {
+impl Game for TetrisGame {
+    fn start(&mut self) -> Result<(), TetrisError> {
+        if self.game_over {
+            return Err(TetrisError::GameOver);
+        }
+
         self.fill_queue();
-        self.load_next_piece();
+        self.load_next_piece()
     }
 
-    fn next_frame(&mut self, inputs: VecDeque<TetrisInput>) {
-        for input in inputs {
-            let _ = self.execute_input(input);
+    fn next_frame(&mut self, inputs: &mut VecDeque<TetrisInput>) -> Result<(), TetrisError> {
+        if self.game_over {
+            return Err(TetrisError::GameOver);
         }
+        if self.active_piece().is_none() {
+            return Err(TetrisError::GameNotStarted);
+        }
+
+        while !inputs.is_empty() {
+            let _ = self.execute_input(inputs.pop_front().unwrap());
+        }
+
         self.frame += 1;
+        Ok(())
+    }
+
+    fn end_game(&mut self) {
+        self.game_over = true;
     }
 }

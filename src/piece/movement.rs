@@ -53,7 +53,6 @@ impl Piece {
             }
         }
 
-        println!("{drop_y}");
         self.position.set_y(23 - drop_y as i32);
         Ok(())
     }
