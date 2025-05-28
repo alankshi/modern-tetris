@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 #[derive(Debug, Clone, Copy)]
 pub struct Position {
     x: i32,
@@ -53,5 +55,27 @@ impl Position {
 impl Default for Position {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Add<Position> for Position {
+    type Output = Self;
+
+    fn add(mut self, rhs: Position) -> Self {
+        self.x += rhs.x;
+        self.y += rhs.y;
+
+        self
+    }
+}
+
+impl Sub<Position> for Position {
+    type Output = Self;
+
+    fn sub(mut self, rhs: Position) -> Self {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
+
+        self
     }
 }
