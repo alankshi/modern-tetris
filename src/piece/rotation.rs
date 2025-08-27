@@ -1,4 +1,9 @@
-use crate::{Piece, TetrisError};
+use crate::{Piece, TetrisError, piece::Position};
+
+enum RotationDirection {
+    Clockwise,
+    CounterClockwise,
+}
 
 impl Piece {
     /// Rotate the piece clockwise, changing its orientation accordingly
@@ -21,4 +26,15 @@ impl Piece {
         self.mask = self.kind.mask(self.orientation);
         Ok(())
     }
+}
+
+fn get_offsets(piece: &Piece, direction: RotationDirection) -> impl Iterator<Item = Position> {
+    [
+        Position::at(0, 0),
+        Position::at(0, 0),
+        Position::at(0, 0),
+        Position::at(0, 0),
+        Position::at(0, 0),
+    ]
+    .into_iter()
 }

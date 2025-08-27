@@ -17,7 +17,44 @@ impl Board {
                 (-piece.y() + 23) as u8 - y_offset + 1;
         }
 
+        let lines_cleared = self.clear_lines(piece);
+
         Ok(())
+    }
+
+    fn clear_lines(&mut self, piece: Piece) -> u8 {
+        let mut lines_cleared: u8 = 0;
+
+        for (i, edge) in piece.left_edge().iter().rev().enumerate() {
+            let row = (piece.y() + 3) as usize - i;
+
+            if edge.is_some() && self.board[row].iter().all(|cell| cell.is_some()) {
+                lines_cleared += 1;
+                for cell in self.board[row].iter_mut() {
+                    *cell = None;
+                }
+            } else if row < self.height() as usize && lines_cleared > 0 {
+                for i in 0..self.width() as usize {
+                    self.board[row + lines_cleared as usize][i] = self.board[row][i];
+                }
+            }
+        }
+
+        if lines_cleared > 0 {
+            for row in (0..piece.y() as usize).rev() {
+                for i in 0..self.width() as usize {
+                    self.board[row + lines_cleared as usize][i] = self.board[row][i];
+                }
+            }
+
+            for col in self.column_heights.iter_mut() {
+                *col -= lines_cleared;
+            }
+        }
+        if lines_cleared > 0 {
+            println!("{lines_cleared}");
+        }
+        return lines_cleared;
     }
 }
 
