@@ -16,7 +16,7 @@ pub struct TetrisGame {
     game_over: bool,
     can_hold: bool,
     queue_size: usize,
-    frame: u64,
+    frame: usize,
 }
 
 impl TetrisGame {

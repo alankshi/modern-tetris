@@ -11,3 +11,4 @@ categories = ["games"]
 
 [dependencies]
 rand = "0.9.1"
+tracing = "0.1.41"

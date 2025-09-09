@@ -3,6 +3,8 @@ use crate::{Game, TetrisError, TetrisGame};
 
 use std::mem;
 
+use tracing::{Level, event};
+
 impl Controllable for TetrisGame {
     fn move_left(&mut self) -> Result<(), TetrisError> {
         self.active_piece.as_mut().unwrap().move_left(&self.board)
@@ -25,12 +27,14 @@ impl Controllable for TetrisGame {
     }
 
     fn hard_drop(&mut self) -> Result<(), TetrisError> {
+        event!(Level::INFO, "Hard drop initiated");
+
         let mut piece_to_drop = None;
         mem::swap(&mut self.active_piece, &mut piece_to_drop);
 
         self.board.hard_drop(piece_to_drop.unwrap())?;
         self.can_hold = true;
-        self.load_next_piece();
+        self.load_next_piece().unwrap();
 
         Ok(())
     }
@@ -47,7 +51,7 @@ impl Controllable for TetrisGame {
         mem::swap(&mut self.active_piece, &mut prev_hold_piece);
 
         if self.active_piece().is_none() {
-            self.load_next_piece();
+            self.load_next_piece().unwrap();
         }
 
         let prev_active_piece = prev_hold_piece;
@@ -68,7 +72,7 @@ mod tests {
     #[test]
     fn successful_hold() {
         let mut game = TetrisGame::new_tetrio();
-        game.start();
+        game.start().unwrap();
 
         let active_kind = game
             .active_piece()
@@ -117,7 +121,7 @@ mod tests {
     #[test]
     fn unsuccessful_hold() {
         let mut game = TetrisGame::new_tetrio();
-        game.start();
+        game.start().unwrap();
 
         assert_eq!(
             Ok(()),
